@@ -1,0 +1,6 @@
+### Automation ###
+brew install erlang
+brew install rabbitmq
+brew services start rabbitmq
+
+celery -A core worker --loglevel=info
