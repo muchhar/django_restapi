@@ -41,6 +41,17 @@ class Product(models.Model):
     def __str__(self):
         return f"{self.product_number} - {self.name}"
 
+class OldUserInventory(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField(default=0)
+    date = models.DateField()  
+    class Meta:
+        unique_together = ('user', 'product','date')
+    
+    def __str__(self):
+        return f"{self.user.username}'s {self.product.name}: {self.quantity} {self.date}"
+
 class UserInventory(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
@@ -51,6 +62,17 @@ class UserInventory(models.Model):
     
     def __str__(self):
         return f"{self.user.username}'s {self.product.name}: {self.quantity}"
+class OldIncomingInventory(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField()
+    arrival_date = models.DateField()  # Calculated as order_date + lead_time
+    
+    class Meta:
+        unique_together = ('user', 'product', 'arrival_date')
+    
+    def __str__(self):
+        return f"{self.product.name} arriving on {self.arrival_date}"
 
 class IncomingInventory(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

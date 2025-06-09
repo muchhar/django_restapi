@@ -9,3 +9,7 @@ admin.site.register(Product)
 admin.site.register(UserInventory)
 admin.site.register(IncomingInventory)
 admin.site.register(DailyInventoryMetrics)
+admin.site.register(OldIncomingInventory)
+admin.site.register(OldUserInventory)
+
+

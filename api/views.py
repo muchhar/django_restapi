@@ -20,8 +20,8 @@ import os
 import base64
 from django.conf import settings
 from rest_framework.parsers import MultiPartParser
-from .serializers import ImageUploadSerializer
-
+from .serializers import ImageUploadSerializer,DailyInventoryMetricsSerializer
+from .models import DailyInventoryMetrics, Product
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.path.join(settings.BASE_DIR, 'service_account.json')
 class ImageTextExtractView(APIView):
     parser_classes = (MultiPartParser,)
@@ -238,16 +238,19 @@ class SalesDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = SalesSerializer
     permission_classes = [permissions.IsAuthenticated]
 
-class IncomingInventoryListCreateView(generics.ListCreateAPIView):
-    queryset = IncomingInventory.objects.all()
-    serializer_class = IncomingInventorySerializer
-    permission_classes = [permissions.IsAuthenticated]
 
 class IncomingInventoryDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = IncomingInventory.objects.all()
     serializer_class = IncomingInventorySerializer
     permission_classes = [permissions.IsAuthenticated]
 
+class IncomingInventoryListCreateView(generics.ListCreateAPIView):
+    serializer_class = IncomingInventorySerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        # Return only the incoming inventory for the current authenticated user
+        return IncomingInventory.objects.filter(user=self.request.user)
 
 
 class MetricsView(APIView):
@@ -278,3 +281,27 @@ class MetricsView(APIView):
                 "planned_arrival": []
             }
         })
+class GetSOQAPIView(APIView):
+    permission_classes = [permissions.IsAuthenticated]  # Require JWT authentication
+
+    def get(self, request):
+        user = request.user  # Automatically fetched from JWT
+        product_id = request.query_params.get('product_id')
+        date = request.query_params.get('date')
+
+        if not product_id or not date:
+            return Response({"error": "Missing required parameters (product_id, date)"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            product = Product.objects.get(id=product_id)
+            metric = DailyInventoryMetrics.objects.get(
+                user=user,
+                product=product,
+                date=date,
+            )
+            serializer = DailyInventoryMetricsSerializer(metric)
+            return Response(serializer.data)
+        except Product.DoesNotExist:
+            return Response({"error": "Product not found"}, status=status.HTTP_404_NOT_FOUND)
+        except DailyInventoryMetrics.DoesNotExist:
+            return Response({"error": "No data found for this combination"}, status=status.HTTP_404_NOT_FOUND)

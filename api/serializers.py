@@ -1,13 +1,16 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 
-from .models import Category, Product, UserInventory, Sales, IncomingInventory
+from .models import Category, Product, UserInventory, Sales, IncomingInventory,DailyInventoryMetrics
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 import base64
 
 User = get_user_model()  # Ensures we use the custom User model
 from .models import ImageUpload
-
+class DailyInventoryMetricsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DailyInventoryMetrics
+        fields = ['soq']
 class ImageUploadSerializer(serializers.ModelSerializer):
     class Meta:
         model = ImageUpload

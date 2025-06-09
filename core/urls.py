@@ -8,7 +8,7 @@ from api.views import (
     IncomingInventoryListCreateView, IncomingInventoryDetailView,
     BuyProductSerializer,SellProductSerializer,
     BuyProductView,SellProductView,
-    MetricsView,ProcessProductImageView,ImageTextExtractView
+    MetricsView,ProcessProductImageView,ImageTextExtractView,GetSOQAPIView
 )
 from django.conf import settings
 from django.conf.urls.static import static
@@ -48,5 +48,5 @@ urlpatterns = [
 
     #img
     path('api/extract-text/', ImageTextExtractView.as_view(), name='extract-text'),
-
+    path('api/get-soq/', GetSOQAPIView.as_view(), name='get-soq'),
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
